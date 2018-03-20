@@ -1,145 +1,92 @@
-import re, sys, dash, mpl_toolkits.basemap
-
+import re, sys, dash
 import pandas as pd
 import requests as r
 import zipcodes as zc
 import matplotlib.pyplot as plt
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.plotly as py
 
+from plotly.graph_objs import *
 from bs4 import BeautifulSoup as bs
 from dash.dependencies import Input, Output
 from textwrap import dedent as d
 
+
 # Load data
 df = pd.read_csv('data/chipotle_df.csv')
 
+df_piv = df.groupby(
+                    ['address','store_no','lat','lon', 'state']
+                    ).agg({'Amount':['sum','count','mean']}).reset_index()
 
-scl = [ [0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"],\
-    [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(220, 220, 220)"] ]
+amounts = df_piv['Amount']
+df_piv['text'] = 'Visits: '+amounts['count'].map(str)+\
+                  '<br>Avg $: '+amounts['mean'].map(str)+\
+                  '<br>Total $: '+amounts['sum'].map(str)+\
+                  '<br>'+df_piv['address']
+scale = .5
 
-data = [ dict(
-        type = 'scattergeo',
+data = Data([dict(type = 'scattergeo',
         locationmode = 'USA-states',
-        lon = df['long'],
-        lat = df['lat'],
-        text = df['address'],
-        mode = 'markers',
+        lon = df_piv['lon'],
+        lat = df_piv['lat'],
+        text = df_piv['text'],
         marker = dict(
-            size = 4,
-            opacity = 0.8,
-            reversescale = True,
-            autocolorscale = False,
-            symbol = 'circle',
-            line = dict(
-                width=1,
-                color='rgba(102, 102, 102)'
-            ),
-            colorscale = scl,
-            cmin = 0,
-            colorbar=dict(
-                title="frequency"
-            )
-        ))]
+            size = (df_piv['Amount']['sum'])/scale,
+            color = 'red',
+            line = dict(width=0.5, color='rgb(40,40,40)'),
+            sizemode = 'area'
+        ),
+        )
+])
 
 layout = dict(
-        title = 'foobar',
-        colorbar = True,
+        title = 'Frequented Chipotles',
+        showlegend = False,
         geo = dict(
             scope='usa',
             projection=dict( type='albers usa' ),
             showland = True,
-            landcolor = "rgb(250, 250, 250)",
-            subunitcolor = "rgb(217, 217, 217)",
-            countrycolor = "rgb(217, 217, 217)",
-            countrywidth = 0.5,
-            subunitwidth = 0.5
+            landcolor = 'rgb(209, 187, 175)',
+            subunitwidth=1,
+            countrywidth=1,
+            subunitcolor="rgb(255, 255, 255)",
+            countrycolor="rgb(255, 255, 255)"
         ),
     )
 
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    }
-}
-
-
-fig = dict( data=data, layout=layout )    
+fig = dict(data=data, layout=layout)
 
 app = dash.Dash()
+
 app.layout  = html.Div([
-    dcc.Graph(id='basic-interactions', figure=fig),
-        html.Div(className='row', children=[
-        html.Div([
-            dcc.Markdown(d("""
-                **Hover Data**
-
-                Mouse over values in the graph.
-            """)),
-            html.Pre(id='hover-data', style=styles['pre'])
-        ], className='three columns'),
-
-        html.Div([
-            dcc.Markdown(d("""
-                **Click Data**
-
-                Click on points in the graph.
-            """)),
-            html.Pre(id='click-data', style=styles['pre']),
-        ], className='three columns'),
-
-        html.Div([
-            dcc.Markdown(d("""
-                **Selection Data**
-
-                Choose the lasso or rectangle tool in the graph's menu
-                bar and then select points in the graph.
-            """)),
-            html.Pre(id='selected-data', style=styles['pre']),
-        ], className='three columns'),
-
-        html.Div([
-            dcc.Markdown(d("""
-                **Zoom and Relayout Data**
-
-                Click and drag on the graph to zoom or click on the zoom
-                buttons in the graph's menu bar.
-                Clicking on legend items will also fire
-                this event.
-            """)),
-            html.Pre(id='relayout-data', style=styles['pre']),
-        ], className='three columns')
-    ])
+    dcc.Graph(id='graph', figure=fig)
 ])
 
 
-@app.callback(
-    Output('hover-data', 'children'),
-    [Input('basic-interactions', 'hoverData')])
-def display_hover_data(hoverData):
-    return json.dumps(hoverData, indent=2)
 
-
-@app.callback(
-    Output('click-data', 'children'),
-    [Input('basic-interactions', 'clickData')])
-def display_click_data(clickData):
-    return json.dumps(clickData, indent=2)
-
-
-@app.callback(
-    Output('selected-data', 'children'),
-    [Input('basic-interactions', 'selectedData')])
-def display_selected_data(selectedData):
-    return json.dumps(selectedData, indent=2)
-
-
-@app.callback(
-    Output('relayout-data', 'children'),
-    [Input('basic-interactions', 'relayoutData')])
-def display_selected_data(relayoutData):
-    return json.dumps(relayoutData, indent=2)
+"""@app.callback(
+        dash.dependencies.Output('geo_freq', 'figure'),
+    [dash.dependencies.Input('state_selector', 'values')])
+def filter_graph(values):
+    filtered_df = df_piv[df_piv['state'].isin(values)]
+    data = dict(
+		type = 'scattergeo',
+		locationmode = 'USA-states',
+		lon = filtered_df['lon'],
+		lat = filtered_df['lat'],
+		text = filtered_df['text'],
+		marker = dict(
+		size = (filtered_df['Amount']['sum'])/scale,
+		color = 'red',
+		line = dict(width=0.5, color='rgb(40,40,40)'),
+		sizemode = 'area'),)
+    
+    return Figure(data=data)"""
 
 if __name__ == '__main__':
-	app.run_server(debug=True)	
+  app.run_server(debug=True)
+
+
+
