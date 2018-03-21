@@ -20,8 +20,9 @@ ch_grey = '#686E70'
 global_style = {
     'color':ch_grey,
     'font-family': 'verdana',
-    'margin-left': '7px',
+    'margin-left': '2px',
     'text-align': 'left',
+    'width': '100%'
     }
 h1_style= {
     'color': ch_red,
@@ -36,42 +37,77 @@ p_style = {}
 
 # Load data
 df = pd.read_csv('data/chipotle_df.csv')
+df.Date = pd.to_datetime(df['Date'])
 
+### Pivot for geo scatter
 df_piv = df.groupby(
                     ['address','store_no','lat','lon', 'state']
                     ).agg({'Amount':['sum','count','mean']}).reset_index()
 
 amounts = df_piv['Amount']
+df_piv['short_add'] = df_piv.address.apply(lambda x:re.sub('\w* - .* - ', '',x))
 df_piv['text'] = 'Visits: '+amounts['count'].map(str)+\
                   '<br>Avg $: '+amounts['mean'].map(str)+\
                   '<br>Total $: '+amounts['sum'].map(str)+\
-                  '<br>'+df_piv['address']
+                  '<br>'+df_piv['short_add']
 scale = .5
+###
+
+### Pivot for heatmap
+season_str = {1:"Winter", 2:"Spring", 3:"Summer", 4:"Autumn"}
+days = {0:'Mon',1:'Tues',2:'Weds',3:'Thurs',4:'Fri',5:'Sat',6:'Sun'}
+
+df_hm = df
+df_hm['day_of_week'] = df_hm['Date'].dt.dayofweek
+df_hm['day_of_week'] = df_hm['day_of_week'].apply(lambda x: days[x])
+df_hm['month'] = df_hm.Date.apply(lambda x: x.month)
+df_hm['season'] = df_hm.Date.apply(lambda x:  (x.month%12+3)//3 ).apply(lambda x:
+                                                                 season_str[x])
+###
 
 dropdown = dcc.Checklist(
     id = 'store-check',
-    options = [{'label':k, 'value': k} for k in list(df_piv.store_no.unique())],
-    values = list(df_piv.store_no.unique())
+    options = [{'label':k, 'value': k} for k in list(df_piv.state.unique())],
+    values = list(df_piv.state.unique())
     )
+
+heatradio = dcc.RadioItems(
+    id = 'heat_radio',
+    options = [{'label':'Total $','value':'sum'}, 
+            {'label':'Average $','value':'mean'}, 
+            {'label':'# of Visits','value':'count'}],
+    value = 'sum',
+    labelStyle={'display':'inline-block'}
+    )
+
 
 app = dash.Dash()
 
 app.layout  = html.Div([
+
     html.Div([
       html.H1('chipotl.ME',style=h1_style), 
       html.P("""Analysis of your Chipotle consumption from mint.com transaction
       history""", style=p_style)
     ]),
 
-    html.Div([dropdown
-    ]),
+    html.Div([
+      dropdown,
+      dcc.Graph(id='geoscat', 
+            style={'display':'inline-block',
+                    'width':'100%',}),
+      ],
+      style={'display':'inline-block','width':'70%'}
+        ),
 
     html.Div([
-    dcc.Graph(id='geoscat')
-    ]),
-
-  ],
-  style=global_style)
+      heatradio,
+      dcc.Graph(id='heatmap',
+            style={'display': 'inline-block', 'width':'100%','height':'100%'}),],
+      style={'display':'inline-block', 'width':'30%'}
+        )
+    ],
+  style=global_style,className='zxzxzzx')
 
 
 @app.callback(
@@ -79,7 +115,7 @@ app.layout  = html.Div([
     [Input('store-check', 'values')]
     )
 def filter_geoscat_states(values):
-    dff = df_piv[df_piv['store_no'].isin(values)]
+    dff = df_piv[df_piv['state'].isin(values)]
     
     dataf = [dict(
     type='scattergeo',
@@ -96,7 +132,7 @@ def filter_geoscat_states(values):
     )]
 
     layoutf = dict(
-      title='TEst',
+      title='Location Frequency',
       showlegend=False,
       dragmode="zoom",
       geo=dict(
@@ -109,11 +145,28 @@ def filter_geoscat_states(values):
         subunitcolor="rgb(255, 255, 255)",
         countrycolor="rgb(255, 255, 255)"
         ),
-      height=700,
-      jitter=1
+      height=600,
+      jitter=1,
+      hoverlabel=dict(bgcolor=ch_grey,
+                    font=dict(family='verdana', size='9')),
       )
     fig = dict(data=dataf, layout=layoutf)
     return fig
+
+@app.callback(
+    Output('heatmap', 'figure'),
+    [Input('heat_radio', 'value')])
+def ret_heatmap_matrix(value):
+    hm = df_hm.pivot_table(index='day_of_week', columns='season', 
+                            values='Amount', aggfunc=str(value))
+    hm.fillna(0, inplace=True)
+    hm = hm[['Winter','Autumn','Summer','Spring']]
+    hm = hm.reindex(list(days.values())[::-1])
+    trace = Heatmap(z=[hm.values[x] for x in range(0,len(hm.values))],
+                   x=hm.columns, y = hm.index, colorscale='YlOrBr')
+    layout = dict(title='Common Days', height=600)
+    figure = dict(data=[trace], layout=layout)
+    return figure
 
 if __name__ == '__main__':
   app.run_server(debug=True)
