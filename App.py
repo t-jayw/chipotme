@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.plotly as py
+import statsmodels.api as sm
 
 from plotly.graph_objs import *
 from bs4 import BeautifulSoup as bs
@@ -84,29 +85,44 @@ heatradio = dcc.RadioItems(
 ###
 # Create Line Chart
 ###
+ldf = df
+ldf = ldf[['Amount', 'Date']]
+ldf = ldf.set_index('Date')
+ldf['Date'] = ldf.index
+ldf.index = pd.to_datetime(ldf.index)
+ldf['numdate'] = ldf.index.to_julian_date()
+
+model = sm.formula.ols(formula='Amount ~ numdate', data=ldf)
+res = model.fit()
+ldf['trend'] = res.fittedvalues
+
 spend = Scatter(
-	y = df['Amount'],
-	x = df['Date'],
-	name = 'Spend',)
-average = Scatter(
-	x = df['Date'], 
-	y = [df['Amount'].mean()]*len(df),
-	name = 'Avg',
-	hoverinfo='none'
+    x = ldf['Date'],
+    y = ldf['Amount'],
+    name = 'Spend',)
+trend = Scatter(
+    x = ldf['Date'],
+    y = ldf['trend'],
+    name = 'Trend',
+    hoverinfo='none'
 )
 
+data = [spend, trend]
 
 scatter_lay = Layout(
-	xaxis={'title':'Date'},
-	yaxis={'title':'Purchase Price ($)'}
-)
+                yaxis=dict(
+					zeroline=True, 
+					range=[0,max(trend.y)+5],
+					title='Spend in Local Currency'),
+                xaxis=dict(title='Date')
+                )
+
+fig = Figure(data=data,layout=scatter_lay)
 
 scatter_graph = dcc.Graph(
-	id='spend_line',
-	figure={'data':[spend,average],
-			'layout':scatter_lay
-			}
-	)
+    id='spend_line',
+    figure=fig
+    )
 
 
 			
