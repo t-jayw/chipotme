@@ -22,7 +22,9 @@ global_style = {
     'font-family': 'verdana',
     'margin-left': '2px',
     'text-align': 'left',
-    'width': '100%'
+    'width': '80%',
+	'left-margin':'5%',
+	'right-margin':'5%'
     }
 h1_style= {
     'color': ch_red,
@@ -73,14 +75,41 @@ dropdown = dcc.Checklist(
 
 heatradio = dcc.RadioItems(
     id = 'heat_radio',
-    options = [{'label':'Total $','value':'sum'}, 
-            {'label':'Average $','value':'mean'}, 
+    options = [{'label':"Total Spend    ",'value':'sum'}, 
+            {'label':'Average Spend   ','value':'mean'}, 
             {'label':'# of Visits','value':'count'}],
     value = 'sum',
     labelStyle={'display':'inline-block'}
     )
+###
+# Create Line Chart
+###
+spend = Scatter(
+	y = df['Amount'],
+	x = df['Date'],
+	name = 'Spend',)
+average = Scatter(
+	x = df['Date'], 
+	y = [df['Amount'].mean()]*len(df),
+	name = 'Avg',
+	hoverinfo='none'
+)
 
 
+scatter_lay = Layout(
+	xaxis={'title':'Date'},
+	yaxis={'title':'Purchase Price ($)'}
+)
+
+scatter_graph = dcc.Graph(
+	id='spend_line',
+	figure={'data':[spend,average],
+			'layout':scatter_lay
+			}
+	)
+
+
+			
 app = dash.Dash()
 
 app.layout  = html.Div([
@@ -90,6 +119,10 @@ app.layout  = html.Div([
       html.P("""Analysis of your Chipotle consumption from mint.com transaction
       history""", style=p_style)
     ]),
+	
+	html.Div([
+	  scatter_graph
+	], style={'width':'40%'}),
 
     html.Div([
       dropdown,
@@ -136,6 +169,10 @@ def filter_geoscat_states(values):
       showlegend=False,
       dragmode="zoom",
       geo=dict(
+        center=dict(
+            lon=(dff.lon.max()+dff.lon.min())/2,
+            lat=(df.lat.max()+df.lat.min())/2,
+            showcoastlines=True),
         scope='usa',
         projection=dict(type='albers usa'),
         showland=True,
@@ -147,6 +184,7 @@ def filter_geoscat_states(values):
         ),
       height=600,
       jitter=1,
+      zoom=10,
       hoverlabel=dict(bgcolor=ch_grey,
                     font=dict(family='verdana', size='9')),
       )
@@ -160,7 +198,7 @@ def ret_heatmap_matrix(value):
     hm = df_hm.pivot_table(index='day_of_week', columns='season', 
                             values='Amount', aggfunc=str(value))
     hm.fillna(0, inplace=True)
-    hm = hm[['Winter','Autumn','Summer','Spring']]
+    hm = hm[['Spring','Summer','Autumn','Winter']]
     hm = hm.reindex(list(days.values())[::-1])
     trace = Heatmap(z=[hm.values[x] for x in range(0,len(hm.values))],
                    x=hm.columns, y = hm.index, colorscale='YlOrBr')
