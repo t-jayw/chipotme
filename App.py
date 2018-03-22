@@ -89,7 +89,7 @@ heatradio = dcc.RadioItems(
 # Create Line Chart
 ###
 scatter_graph = lg.ChipotleSpendLine(df)
-scatter_graph = scatter_graph.ret_graph(value='b')
+scatter_graph = scatter_graph.ret_graph(value='b', svalue='0')
 ###
 ###
 			
@@ -103,9 +103,15 @@ app.layout  = html.Div([
       history""", style=p_style)
     ]),
 	
-	html.Div([lg.spendline_radio,
-	  dcc.Graph(id='spendline')
-	], style={'width':'40%'}),
+	html.Div([
+    html.Div([lg.spendline_radio]),
+    html.Div(
+      [dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
+      lg.spendline_slider], 
+      style={'padding-top':'10px', 'padding-bottom':'20px',
+              'padding-left':'10px'}),
+	  html.Div([dcc.Graph(id='spendline')])
+	], style={'width':'50%'}),
 
     html.Div([
       dropdown,
@@ -127,11 +133,11 @@ app.layout  = html.Div([
 
 @app.callback(
     Output('spendline', 'figure'),
-    [Input('line_radio', 'value')]
+    [Input('line_radio', 'value'), Input('line_slider', 'value')]
     )
-def line_graph_cb(value):
-    line_graph = lg.ChipotleSpendLine(df, value)
-    return line_graph.ret_graph(value)
+def line_graph_cb(value, svalue):
+    line_graph = lg.ChipotleSpendLine(df, value, svalue)
+    return line_graph.ret_graph(value, svalue)
 
 @app.callback(
     Output('geoscat', 'figure'), 
