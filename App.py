@@ -13,8 +13,6 @@ from bs4 import BeautifulSoup as bs
 from dash.dependencies import Input, Output
 from textwrap import dedent as d
 
-import LineGraph as lg
-
 # 
 ch_red = 'rgb(140,21,5)'
 ch_brown = 'rgb(69, 20, 0)'
@@ -85,13 +83,48 @@ heatradio = dcc.RadioItems(
     labelStyle={'display':'inline-block'}
     )
 ###
-###
 # Create Line Chart
 ###
-scatter_graph = lg.ChipotleSpendLine(df)
-scatter_graph = scatter_graph.ret_graph(value='b')
-###
-###
+ldf = df
+ldf = ldf[['Amount', 'Date']]
+ldf = ldf.set_index('Date')
+ldf['Date'] = ldf.index
+ldf.index = pd.to_datetime(ldf.index)
+ldf['numdate'] = ldf.index.to_julian_date()
+
+model = sm.formula.ols(formula='Amount ~ numdate', data=ldf)
+res = model.fit()
+ldf['trend'] = res.fittedvalues
+
+spend = Scatter(
+    x = ldf['Date'],
+    y = ldf['Amount'],
+    name = 'Spend',)
+trend = Scatter(
+    x = ldf['Date'],
+    y = ldf['trend'],
+    name = 'Trend',
+    hoverinfo='none'
+)
+
+data = [spend, trend]
+
+scatter_lay = Layout(
+                yaxis=dict(
+					zeroline=True, 
+					range=[0,max(trend.y)+5],
+					title='Spend in Local Currency'),
+                xaxis=dict(title='Date')
+                )
+
+fig = Figure(data=data,layout=scatter_lay)
+
+scatter_graph = dcc.Graph(
+    id='spend_line',
+    figure=fig
+    )
+
+
 			
 app = dash.Dash()
 
@@ -103,8 +136,8 @@ app.layout  = html.Div([
       history""", style=p_style)
     ]),
 	
-	html.Div([lg.spendline_radio,
-	  dcc.Graph(id='spendline')
+	html.Div([
+	  scatter_graph
 	], style={'width':'40%'}),
 
     html.Div([
@@ -125,13 +158,6 @@ app.layout  = html.Div([
     ],
   style=global_style,className='zxzxzzx')
 
-@app.callback(
-    Output('spendline', 'figure'),
-    [Input('line_radio', 'value')]
-    )
-def line_graph_cb(value):
-    line_graph = lg.ChipotleSpendLine(df, value)
-    return line_graph.ret_graph(value)
 
 @app.callback(
     Output('geoscat', 'figure'), 
