@@ -1,4 +1,4 @@
-import re, sys, dash
+import re, sys, dash, datetime
 
 import pandas as pd  
 import plotly.plotly as py
@@ -21,16 +21,34 @@ spendline_radio = dcc.RadioItems(
   labelStyle={'display':'inline-block'}
   )
 
+spendline_slider = dcc.Slider(
+  id = 'line_slider',
+  min = 0,
+  max = 5,
+  step=None,
+  marks={
+    0: 'None',
+    1: '1 yr',
+    2: '2 yrs',
+    3: '3 yrs',
+    4: '4 yrs',
+    5: '5 yrs'},
+  value = 0
+)
+
 class ChipotleSpendLine(object):
-  def __init__(self, df, value='a'):
+  def __init__(self, df, value='a', slide_value='0'):
     self.df = df
-    self.df.Date = pd.to_datetime(self.df['Date'])
-    self.df = self.prep_data()
-    self.value = value
-    self.set_trend_col()
-    self.set_cs_trend_col()
     self.target = {'a':{'col':'Amount','trend':'trend'},
               'b':{'col':'cum_sum', 'trend':'cs_trend'}}
+    self.df.Date = pd.to_datetime(self.df['Date'])
+    self.base = df.Date.max()
+    self.df = self.prep_data()
+    self.set_trend_col()
+    self.set_cs_trend_col()
+    self.forecast()
+    self.trim_df(slide_value)
+    self.value = value
 
   def prep_data(self):
     ldf = self.df
@@ -57,19 +75,42 @@ class ChipotleSpendLine(object):
     ldf['cs_trend'] = res.fittedvalues
     self.df = ldf
     self.cs_trend = res
-    print(self.df.head())
     
+  def forecast(self, max_years = 5):
+    numdays = 365 * max_years
+    base = self.base
+    date_list = [base + datetime.timedelta(days=x) for x in range(0, numdays)]
+    extension = pd.DataFrame(index=date_list)
+    extension['numdate'] = extension.index.to_julian_date()
+    extension['Date'] = extension.index
+    extension[self.target['a']['col']] = None
+    extension[self.target['b']['col']] = None
+    extension = extension.assign(trend = lambda x: self.trend.predict(x))
+    extension = extension.assign(cs_trend = lambda x: self.cs_trend.predict(x))
+    ex_df = self.df.append(extension)
+    self.df = ex_df
+
+  def trim_df(self, slide_value):
+    print(self.df.tail())
+    max_date = self.base + datetime.timedelta(days = 365*int(slide_value))
+    self.plot_df = self.df[self.df.index <= max_date]
+    print(max_date)
+    print(self.plot_df.head())
+    print(self.plot_df.tail())
+
   def make_scatters(self, value):
     spend = Scatter(
-      x = self.df['Date'],
-      y = self.df[self.target[value]['col']],
+      x = self.plot_df['Date'],
+      y = self.plot_df[self.target[value]['col']],
       name = 'Spend',
+      line = dict(color = 'rgb(140,21,5)' )
     )
     trend = Scatter(
-      x = self.df['Date'],
-      y = self.df[self.target[value]['trend']],
+      x = self.plot_df['Date'],
+      y = self.plot_df[self.target[value]['trend']],
       name = 'Trend',
-      hoverinfo='none'
+      hoverinfo='none', 
+      line = dict(color = 'rgb(69, 20, 0)')
     )
     self.data = [spend, trend]
     return [spend, trend]
@@ -95,8 +136,8 @@ class ChipotleSpendLine(object):
       figure=self.fig)
     self.graph = scatter_graph
 
-  def make_graph(self, value='b'):
-
+  def make_graph(self, value='b', svalue='0'):
+    self.trim_df(svalue)
     data = self.make_scatters(value)
     layout = self.make_lay(value)
     fig = Figure(data=data, layout=layout)
@@ -104,5 +145,5 @@ class ChipotleSpendLine(object):
                               figure = fig)
     return fig
 
-  def ret_graph(self,value):
-    return self.make_graph(value)
+  def ret_graph(self,value, svalue):
+    return self.make_graph(value, svalue)
