@@ -23,7 +23,6 @@ class DataHandler(object):
     self.store_records = self.enhance_with_StoreInfo()
     self.final_df = self.merge_txn_and_store_info()
 
-
   def verify_columns(self):
     raw_cols = self.raw_df.columns
     if set(type(self).req_columns).issubset(raw_cols):
