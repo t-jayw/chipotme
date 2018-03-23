@@ -27,7 +27,7 @@ spendline_slider = dcc.Slider(
   max = 5,
   step=None,
   marks={
-    0: 'None',
+    0: 'Now',
     1: '1 yr',
     2: '2 yrs',
     3: '3 yrs',
@@ -108,28 +108,28 @@ class ChipotleSpendLine(object):
     trend = Scatter(
       x = self.plot_df['Date'],
       y = self.plot_df[self.target[value]['trend']],
-      name = 'Trend',
-      hoverinfo='none', 
+      name = 'Trend', 
       line = dict(color = 'rgb(69, 20, 0)')
     )
     self.data = [spend, trend]
     return [spend, trend]
 
   def make_lay(self, value='a'):
+    title_options = {'a':'Purchases over Time','b':'Cumulative Purchases'}
     col = self.target[value]['trend']
     scatter_lay = Layout(
+      title = title_options[value],
       yaxis=dict(
         zeroline=True,
-        range=[0,max(self.df[col])+5],
+        range=[0,max(self.plot_df[col])+5],
         title='Spend in Local Currency'
         ),
-        xaxis=dict(title='Date')
+        xaxis=dict(title='Date'),
+    height=300,
+    paper_bgcolor='#FBF9F6'
     )
     return scatter_lay
   
-  def make_fig(self):
-    return Figure(data=self.data, layout=self.layout)
-
   def make_graph(self):
     scatter_graph = dcc.Graph(
       id='spend-line',

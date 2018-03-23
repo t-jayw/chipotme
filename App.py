@@ -19,15 +19,18 @@ import LineGraph as lg
 ch_red = 'rgb(140,21,5)'
 ch_brown = 'rgb(69, 20, 0)'
 ch_grey = '#686E70'
+background = '#F2EEE4'
 
 global_style = {
     'color':ch_grey,
     'font-family': 'verdana',
     'margin-left': '2px',
     'text-align': 'left',
-    'width': '80%',
-	'left-margin':'5%',
-	'right-margin':'5%'
+    'width': '90%',
+	  'left-margin':'5%',
+	  'right-margin':'5%',
+    'height':'100%',
+    'background-color':background
     }
 h1_style= {
     'color': ch_red,
@@ -109,7 +112,7 @@ app.layout  = html.Div([
       [dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
       lg.spendline_slider], 
       style={'padding-top':'10px', 'padding-bottom':'20px',
-              'padding-left':'10px'}),
+              'padding-left':'10px', 'font-size':'1em'}),
 	  html.Div([dcc.Graph(id='spendline')])
 	], style={'width':'50%'}),
 
@@ -181,6 +184,7 @@ def filter_geoscat_states(values):
       height=600,
       jitter=1,
       zoom=10,
+      plot_bgcolor=background,
       hoverlabel=dict(bgcolor=ch_grey,
                     font=dict(family='verdana', size='9')),
       )
