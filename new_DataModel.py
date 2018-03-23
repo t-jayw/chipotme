@@ -21,6 +21,7 @@ class DataHandler(object):
       raise ValueError('Provided csv does not contain needed columns')
     self.pdf = self.gen_processed_df()
     self.store_records = self.enhance_with_StoreInfo()
+    self.final_df = self.merge_txn_and_store_info()
 
 
   def verify_columns(self):
@@ -84,12 +85,18 @@ class DataHandler(object):
         else: 
           print('problem making row')
       else:
-        print('already known')
+        continue
     srdf.drop_duplicates().to_csv('data/chipotle_store_info.csv', index=False)
     return srdf
   
-  def parse_short_address(self):
-    self.store_records['short_address'] = self.store_records.address.apply(lambda x: re.sub('\w* - .* -','',x))
+  def merge_txn_and_store_info(self):
+    """merges the txn processed df and the store info df"""
+    final_df = pd.merge(self.pdf, self.store_records.drop_duplicates(), 
+                    left_on='store_no_int', right_on='store_no', how='left')
+    final_df = final_df.drop('store_no_y', axis = 1)
+    final_df.rename(columns={'store_no_x':'store_no_string','store_no_int':'store_no'}, inplace=True)
+    return final_df
+
 
 
 if __name__ == '__main__':
