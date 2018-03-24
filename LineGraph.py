@@ -33,7 +33,9 @@ spendline_slider = dcc.Slider(
     3: '3 yrs',
     4: '4 yrs',
     5: '5 yrs'},
-  value = 0
+  value = 0,
+  updatemode='drag'
+
 )
 
 class ChipotleSpendLine(object):
@@ -91,12 +93,8 @@ class ChipotleSpendLine(object):
     self.df = ex_df
 
   def trim_df(self, slide_value):
-    print(self.df.tail())
     max_date = self.base + datetime.timedelta(days = 365*int(slide_value))
     self.plot_df = self.df[self.df.index <= max_date]
-    print(max_date)
-    print(self.plot_df.head())
-    print(self.plot_df.tail())
 
   def make_scatters(self, value):
     spend = Scatter(
