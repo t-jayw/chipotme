@@ -51,7 +51,7 @@ class MapBox(object):
 						size=dff['size'],
 						opacity = 0.4
 						),
-					hoverinfo=dff['text']
+					text=dff['text']
 					)
 				])
 
