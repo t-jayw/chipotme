@@ -18,6 +18,7 @@ class MapBox(object):
 		self.df = df 
 		self.scale = 4000
 		self.df_geo = self.create_piv_for_geo()
+		self.dropdown_element = self.create_drop_down_element()
 
 	def create_piv_for_geo(self):
 		df_geo = self.df.groupby(['address', 'store_no', 'lat', 'lon', 'state', 'short_address'])

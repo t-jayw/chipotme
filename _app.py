@@ -58,6 +58,7 @@ html.Div([
 
 ## MAPBOX
 html.Div([
+		box.dropdown_element,
 		dcc.Graph(id='mapbox', figure=box.return_mapbox_scatter())
 	], style={'width':'80%','margin':'0 auto', 'height':'auto'}
 	),
