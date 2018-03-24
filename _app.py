@@ -14,15 +14,18 @@ from dash.dependencies import Input, Output
 from textwrap import dedent as d
 
 import LineGraph as lg
-import DataReader as dr
+
 import StoreLocator as sl
 import new_DataModel as dm
+import GeoScatter as gs 
 # 
 
 # Load data
 data_obj = dm.DataHandler()
 
 df = data_obj.final_df
+
+geo = gs.GeoScatter(df)
 
 app = dash.Dash()
 
@@ -45,11 +48,13 @@ app.layout  = html.Div([
 	], style={'width':'50%'}),
 
     html.Div([
-      dcc.Graph(id='geoscat', 
-            style={'display':'inline-block',
-                    'width':'100%',}),
-      ],
-      style={'display':'inline-block','width':'70%'}
+
+	  dcc.Graph(id='geoscat', 
+		        style={'display':'inline-block',
+		               'width':'100%',}),
+	  geo.dropdown_element,
+		],
+      style={'display':'inline-block','width':'50%'}
         ),
 
     html.Div([
@@ -59,6 +64,13 @@ app.layout  = html.Div([
         )
     ],
   style={},className='zxzxzzx')
+
+@app.callback(
+      Output('geoscat', 'figure'), 
+      [Input('state_list', 'value')]
+      )
+def return_geoscatter_fig(value):
+	return geo.return_geoscatter_fig(value)
 
 @app.callback(
     Output('spendline', 'figure'),
