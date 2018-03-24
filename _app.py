@@ -19,6 +19,7 @@ import StoreLocator as sl
 import new_DataModel as dm
 import GeoScatter as gs 
 import HeatMap as hm
+import MapBox as mb 
 # 
 
 # Load data
@@ -28,6 +29,7 @@ df = data_obj.final_df
 
 geo = gs.GeoScatter(df)
 heat = hm.HeatMap(df)
+box = mb.MapBox(df)
 
 app = dash.Dash()
 
@@ -45,13 +47,20 @@ html.Div([
   		dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
   		lg.spendline_slider], 
   		style={'padding-top':'10px', 'padding-bottom':'20px',
-          		'padding-left':'10px', 'font-size':'1em'}
+          		'padding-left':'10px', 'font-size':'1em',
+          		'width':'20%'}
         ),
   
   	html.Div(
   		[dcc.Graph(id='spendline')])
 		], style={'width':'100%'}
 		),
+
+## MAPBOX
+html.Div([
+		dcc.Graph(id='mapbox', figure=box.return_mapbox_scatter())
+	], style={'width':'80%','margin':'0 auto', 'height':'auto'}
+	),
 
 ## GEO GRAPH
 html.Div([
@@ -70,7 +79,7 @@ html.Div([
     )
 
 ],
-style={'width':'70%','border':'1px solid black','margin':'0 auto'},className='main'
+style={'width':'80%','border':'1px solid black','margin':'0 auto'},className='main'
 )
 
 
