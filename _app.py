@@ -18,6 +18,7 @@ import LineGraph as lg
 import StoreLocator as sl
 import new_DataModel as dm
 import GeoScatter as gs 
+import HeatMap as hm
 # 
 
 # Load data
@@ -26,6 +27,7 @@ data_obj = dm.DataHandler()
 df = data_obj.final_df
 
 geo = gs.GeoScatter(df)
+heat = hm.HeatMap(df)
 
 app = dash.Dash()
 
@@ -48,16 +50,17 @@ app.layout  = html.Div([
 	], style={'width':'50%'}),
 
     html.Div([
-
+	  geo.dropdown_element,
 	  dcc.Graph(id='geoscat', 
 		        style={'display':'inline-block',
 		               'width':'100%',}),
-	  geo.dropdown_element,
+
 		],
       style={'display':'inline-block','width':'50%'}
         ),
 
     html.Div([
+    heat.radio_element,
       dcc.Graph(id='heatmap',
             style={'display': 'inline-block', 'width':'100%','height':'100%'}),],
       style={'display':'inline-block', 'width':'30%'}
@@ -79,6 +82,14 @@ def return_geoscatter_fig(value):
 def line_graph_cb(value, svalue):
     line_graph = lg.ChipotleSpendLine(df, value, svalue)
     return line_graph.ret_graph(value, svalue)
+
+@app.callback(
+    Output('heatmap', 'figure'),
+    [Input('heat_radio', 'value')])
+def ret_heatmap_figure(value):
+	return heat.ret_heatmap_figure(value)
+
+
 
 if __name__=='__main__':
   print(df.head())
