@@ -48,11 +48,11 @@ app.layout  = html.Div([
 	], style={'width':'50%'}),
 
     html.Div([
-
+	  geo.dropdown_element,
 	  dcc.Graph(id='geoscat', 
 		        style={'display':'inline-block',
 		               'width':'100%',}),
-	  geo.dropdown_element,
+
 		],
       style={'display':'inline-block','width':'50%'}
         ),

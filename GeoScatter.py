@@ -68,6 +68,7 @@ class GeoScatter():
           scope='usa',
           projection=dict(type='albers usa'),
           showland=True,
+          showlakes=True,
           landcolor = 'rgb(209, 187, 175)',
           subunitwidth=1,
           countrywidth=1,
