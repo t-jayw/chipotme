@@ -33,48 +33,57 @@ app = dash.Dash()
 
 app.layout  = html.Div([
 
-    html.Div([
-      html.H1('chipotl.ME'), 
-      html.P("""Analysis of your Chipotle consumption from mint.com transaction
-      history""")
-    ]),
-	
-	html.Div([
-    html.Div([lg.spendline_radio]),
-    html.Div(
-      [dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
-      lg.spendline_slider], 
-      style={'padding-top':'10px', 'padding-bottom':'20px',
-              'padding-left':'10px', 'font-size':'1em'}),
-	  html.Div([dcc.Graph(id='spendline')])
-	], style={'width':'50%'}),
+html.Div([
+	html.H1('chipot.me',), 
+	html.P("""Analysis of your Chipotle consumption from mint.com transaction history""",)
+]),
 
-    html.Div([
-	  geo.dropdown_element,
-	  dcc.Graph(id='geoscat', 
-		        style={'display':'inline-block',
-		               'width':'100%',}),
-
-		],
-      style={'display':'inline-block','width':'50%'}
+## SPEND LINE
+html.Div([
+	html.Div(
+  		[lg.spendline_radio,
+  		dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
+  		lg.spendline_slider], 
+  		style={'padding-top':'10px', 'padding-bottom':'20px',
+          		'padding-left':'10px', 'font-size':'1em'}
         ),
+  
+  	html.Div(
+  		[dcc.Graph(id='spendline')])
+		], style={'width':'100%'}
+		),
 
-    html.Div([
-    heat.radio_element,
-      dcc.Graph(id='heatmap',
-            style={'display': 'inline-block', 'width':'100%','height':'100%'}),],
-      style={'display':'inline-block', 'width':'30%'}
-        )
-    ],
-  style={},className='zxzxzzx')
+## GEO GRAPH
+html.Div([
+    geo.dropdown_element,
+    dcc.Graph(id='geoscat', 
+	        style={'display':'inline-block','width':'100%',}),],
+  	#style={'display':'inline-block','width':'50%'}
+    ),
 
+## HEAT MAP
+html.Div([
+	heat.radio_element,
+  	dcc.Graph(id='heatmap',style={'display': 'inline-block', 
+  							'width':'100%','height':'100%'}),],
+  	#style={'display':'inline-block', 'width':'30%'}
+    )
+
+],
+style={'width':'70%','border':'1px solid black','margin':'0 auto'},className='main'
+)
+
+
+
+### CALLBACKS to graph files and fig returners
+#GEO
 @app.callback(
       Output('geoscat', 'figure'), 
       [Input('state_list', 'value')]
       )
 def return_geoscatter_fig(value):
 	return geo.return_geoscatter_fig(value)
-
+#LINE
 @app.callback(
     Output('spendline', 'figure'),
     [Input('line_radio', 'value'), Input('line_slider', 'value')]
@@ -82,7 +91,7 @@ def return_geoscatter_fig(value):
 def line_graph_cb(value, svalue):
     line_graph = lg.ChipotleSpendLine(df, value, svalue)
     return line_graph.ret_graph(value, svalue)
-
+#HEAT
 @app.callback(
     Output('heatmap', 'figure'),
     [Input('heat_radio', 'value')])

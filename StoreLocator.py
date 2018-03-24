@@ -28,8 +28,6 @@ class StoreInfo(object):
   def fetch_store_info(self):
     output = 'None', 'None'
     url = self.chip_job_url%(str(self.store_no))
-    print(url)
-    print('fetched')
     cont = bs(r.get(url).content, 'html5lib')
     spans = cont.find_all('span')
     lines = [span.get_text() for span in spans]
@@ -60,7 +58,6 @@ class StoreInfo(object):
     store_no = self.store_no
     ### I don't have a record for this store
     ### so I proceed to
-    print('getting record for'+str(store_no))
     columns = ['store_no','zip_code','address','lat','lon','city','state']
     zipcode, location_span = self.fetch_store_info()
     zc_match = self.pull_loc_info(zipcode)

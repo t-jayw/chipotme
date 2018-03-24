@@ -79,8 +79,6 @@ class DataHandler(object):
         store = sl.StoreInfo(x)
         new_row = store.get_new_store_record()
         if new_row:
-          print(new_row)
-          print(srdf.columns)
           srdf.loc[len(srdf)] = new_row
         else: 
           print('problem making row')
@@ -101,4 +99,4 @@ class DataHandler(object):
 
 if __name__ == '__main__':
   foo = DataProcessor()
-  print(foo.pdf.head())
+
