@@ -34,6 +34,8 @@ heat = hm.HeatMap(df)
 
 app = dash.Dash()
 
+map_drop_down_options = 'CO'
+
 app.layout  = html.Div([
 
 html.Div([
@@ -82,8 +84,6 @@ html.Div([
 html.Div([
 		dcc.Dropdown(
 			id = 'map_state_list',
-			options = '',
-			value = [],
 			multi = True
 			),
 		dcc.Graph(id='mapbox',style={'height': '600px', 'width':'100%'}),
@@ -92,7 +92,13 @@ html.Div([
 
 ## HEAT MAP
 html.Div([
-	heat.radio_element,
+	dcc.RadioItems(
+		id = 'heat_radio',
+		options = [{'label':"Total Spend    ",'value':'sum'}, 
+		        {'label':'Average Spend   ','value':'mean'}, 
+		        {'label':'# of Visits','value':'count'}],
+		value = 'sum',
+		labelStyle={'display':'inline-block'}),
   	dcc.Graph(id='heatmap',style={'display': 'inline-block', 
   							'width':'100%','height':'100%'}),],
   	style={'display':'inline-block', 'width':'50%'}
@@ -124,6 +130,14 @@ def do_something(contents): ### TO DO <-- make this a real class with nice funct
 	### if it found a valid CSV, spit out a json blob of it for other classes to handle
 	return ret
 
+@app.callback(
+		Output('map_state_list', 'value'),
+		[Input('json_store', 'children')]
+	)
+def return_geoscatter_dropdownvals(children):
+	mbdf = df if children == '' else pd.read_json(children)
+	box = mb.MapBox(mbdf)
+	return mbdf.state.unique()
 
 @app.callback(
       Output('mapbox', 'figure'), 
@@ -138,13 +152,17 @@ def return_geoscatter_fig(value, children):
       Output('map_state_list', 'options'), 
       [Input('json_store', 'children')]
       )
-def return_geoscatter_dropdownopts(value, children=''):
+def return_geoscatter_dropdownopts(children):
 	print(children)
 	mbdf = df if children == '' else pd.read_json(children)
-	box = mb.MapBox(df)
+	mbox = mb.MapBox(mbdf)
 	print('HIIII')
-	print(box.return_drop_down_list())
-	return box.return_drop_down_list()
+	print(mbox.return_drop_down_list())
+	return mbox.return_drop_down_list()
+
+
+
+
 
 
 
@@ -165,9 +183,12 @@ def line_graph_cb(value, svalue, children):
 #HEAT
 @app.callback(
     Output('heatmap', 'figure'),
-    [Input('heat_radio', 'value')])
-def ret_heatmap_figure(value):
+    [Input('heat_radio', 'value'), Input('json_store', 'children')])
+def ret_heatmap_figure(value, children):
+	hdf = df if children == '' else pd.read_json(children)
+	heat = hm.HeatMap(hdf)
 	return heat.ret_heatmap_figure(value)
+
 
 
 
