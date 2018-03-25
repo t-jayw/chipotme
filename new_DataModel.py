@@ -10,9 +10,12 @@ class DataHandler(object):
   req_columns = ['Date', 'Description', 'Original Description',
                 'Amount', 'Transaction Type', 'Category']
 
-  def __init__(self):
-    self.raw_txns_path = '~/Downloads/transactions (3).csv'
-    self.store_records_path = 'data/chipotle_store_info.csv'
+  def __init__(self, df=None):
+    if df == None:
+      self.raw_txns_path = '~/Downloads/transactions (3).csv'
+      self.store_records_path = 'data/chipotle_store_info.csv'
+    else:
+      self.raw_df = df
     self.raw_df = pd.read_csv(self.raw_txns_path)
     self.store_records = pd.read_csv(self.store_records_path)
     if 'Unnamed: 0' in self.store_records.columns:
