@@ -31,9 +31,10 @@ df = data_obj.final_df
 
 geo = gs.GeoScatter(df)
 heat = hm.HeatMap(df)
-box = mb.MapBox(df)
 
 app = dash.Dash()
+
+map_drop_down_options = 'CO'
 
 app.layout  = html.Div([
 
@@ -62,6 +63,8 @@ dcc.Upload(
     multiple=False
 ), html.P(id="upload", children="please upload")]),
 
+html.Button(id='propagate-button', n_clicks=0, children='Propagate Table Data'),
+
 ## SPEND LINE
 html.Div([
 	html.Div(
@@ -79,19 +82,28 @@ html.Div([
 
 ## MAPBOX
 html.Div([
-		box.dropdown_element, 
+		dcc.Dropdown(
+			id = 'map_state_list',
+			multi = True
+			),
 		dcc.Graph(id='mapbox',style={'height': '600px', 'width':'100%'}),
 	], style={'width':'90%','margin':'0 auto', 'height':'auto'}
 	),
 
 ## HEAT MAP
 html.Div([
-	heat.radio_element,
+	dcc.RadioItems(
+		id = 'heat_radio',
+		options = [{'label':"Total Spend    ",'value':'sum'}, 
+		        {'label':'Average Spend   ','value':'mean'}, 
+		        {'label':'# of Visits','value':'count'}],
+		value = 'sum',
+		labelStyle={'display':'inline-block'}),
   	dcc.Graph(id='heatmap',style={'display': 'inline-block', 
   							'width':'100%','height':'100%'}),],
   	style={'display':'inline-block', 'width':'50%'}
     ),
-html.Div(id="hidden", children="")
+html.Div(id="json_store", children="")
 
 ], 
 style={'width':'70%','border':'1px solid black','margin':'0 auto'},className='main'
@@ -100,53 +112,89 @@ style={'width':'70%','border':'1px solid black','margin':'0 auto'},className='ma
 ### CALLBACKS to graph files and fig returners
 #GEO
 @app.callback(
-	Output('upload', 'children'),
+	Output('json_store', 'children'),
 	[Input('upload-data', 'contents')]
 	)
-def do_something(contents):
+def do_something(contents): ### TO DO <-- make this a real class with nice functions
 	if contents is None:
-		ret = "AHDFHSD"
+		ret = ""
 	else:
 		content_type, content_string = contents.split(',')
 		decoded = base64.b64decode(content_string)
 		df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-		ret = df.head().to_json()
-		print(df.head())
-		run_it()
+		new_DataObj = dm.DataHandler(df)
+		print('have new data')
 
-
-	return_geoscatter_fig(['CO'])
-
+		ret = new_DataObj.final_df.to_json()
+	### if it found a valid CSV, spit out a json blob of it for other classes to handle
 	return ret
 
+@app.callback(
+		Output('map_state_list', 'value'),
+		[Input('json_store', 'children')]
+	)
+def return_geoscatter_dropdownvals(children):
+	mbdf = df if children == '' else pd.read_json(children)
+	box = mb.MapBox(mbdf)
+	return mbdf.state.unique()
 
 @app.callback(
       Output('mapbox', 'figure'), 
-      [Input('map_state_list', 'value')]
+      [Input('map_state_list', 'value'), Input('json_store', 'children')]
       )
-def return_geoscatter_fig(value):
-	print(value)
+def return_geoscatter_fig(value, children):
+	mbdf = df if children == '' else pd.read_json(children)
+	box = mb.MapBox(mbdf)
 	return box.return_mapbox_scatter(value)
+
+@app.callback(
+      Output('map_state_list', 'options'), 
+      [Input('json_store', 'children')]
+      )
+def return_geoscatter_dropdownopts(children):
+	print(children)
+	mbdf = df if children == '' else pd.read_json(children)
+	mbox = mb.MapBox(mbdf)
+	print('HIIII')
+	print(mbox.return_drop_down_list())
+	return mbox.return_drop_down_list()
+
+
+
+
+
+
 
 #LINE
 @app.callback(
     Output('spendline', 'figure'),
-    [Input('line_radio', 'value'), Input('line_slider', 'value')]
+    [Input('line_radio', 'value'), Input('line_slider', 'value'), Input('json_store', 'children')]
     )
-def line_graph_cb(value, svalue):
-    line_graph = lg.ChipotleSpendLine(df, value, svalue)
-    return line_graph.ret_graph(value, svalue)
+def line_graph_cb(value, svalue, children):
+	ldf = df if children == '' else pd.read_json(children)
+	line_graph = lg.ChipotleSpendLine(ldf, value, svalue, children)
+	return line_graph.ret_graph(value, svalue)
+		
+
+
+
+
 #HEAT
 @app.callback(
     Output('heatmap', 'figure'),
-    [Input('heat_radio', 'value')])
-def ret_heatmap_figure(value):
+    [Input('heat_radio', 'value'), Input('json_store', 'children')])
+def ret_heatmap_figure(value, children):
+	hdf = df if children == '' else pd.read_json(children)
+	heat = hm.HeatMap(hdf)
 	return heat.ret_heatmap_figure(value)
 
 
 
+
 if __name__=='__main__':
+
+  map_drop_down_options = []
 
   app.run_server(debug=True)
 

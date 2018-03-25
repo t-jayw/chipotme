@@ -39,7 +39,7 @@ spendline_slider = dcc.Slider(
 )
 
 class ChipotleSpendLine(object):
-  def __init__(self, df, value='a', slide_value='0'):
+  def __init__(self, df, value='a', slide_value='0', children=''):
     self.df = df
     self.target = {'a':{'col':'Amount','trend':'trend'},
               'b':{'col':'cum_sum', 'trend':'cs_trend'}}
@@ -119,13 +119,15 @@ class ChipotleSpendLine(object):
       title = title_options[value],
       yaxis=dict(
         zeroline=True,
-        range=[0,max(self.plot_df[col])+5],
+        range=[0,max(self.plot_df[col])+8],
         title='Spend in Local Currency'
         ),
         xaxis=dict(title='Date'),
     height=300,
     paper_bgcolor='#FBF9F6'
     )
+    print('range: '+str(scatter_lay.yaxis.range))
+    print(max(self.plot_df[col]))
     return scatter_lay
   
   def make_graph(self):
