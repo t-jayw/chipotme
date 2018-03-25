@@ -16,8 +16,8 @@ mapbox_key = keys['mapbox']
 class MapBox(object):
 	def __init__(self, df):
 		self.df = df 
-		self.scale = 4000
 		self.df_geo = self.create_piv_for_geo()
+		self.scale = 4000
 		self.dropdown_element = self.create_drop_down_element()
 
 	def create_piv_for_geo(self):
@@ -33,15 +33,41 @@ class MapBox(object):
 
 	def create_drop_down_element(self):
 		dropdown = dcc.Dropdown(
-			id = 'state_list',
+			id = 'map_state_list',
 			options = [{'label':k, 'value': k} for k in list(self.df_geo.state.unique())],
 			value = list(self.df_geo.state.unique()),
 			multi = True
 			)
 		return dropdown
 
-	def return_mapbox_scatter(self, value=None):
-		dff = self.df_geo
+	def test_zoom(self, lat, lon):
+
+		sq = (lat * lon)
+		lsq = math.log(sq+.01)
+		x = math.log(lat * lon+.01)
+		b = 7.3
+		m = -0.7283
+
+		zoom = (m*x)+b
+
+		if sq == 0:
+			zoom = 12
+
+		if lon >= 40:
+			zoom = 2.7
+
+
+		p = '[%s,%s,%s]'%(lat, lon, zoom)
+		return(zoom)
+
+
+	def return_mapbox_scatter(self, value):
+		if value == []:
+			value = list(self.df_geo.state.unique())
+		dff = self.df_geo[self.df_geo['state'].isin(value)]
+
+		lon_range = (dff.lon.max()-dff.lon.min())
+		lat_range = dff.lat.max()-dff.lat.min()
 
 		data = Data([
 				Scattermapbox(
@@ -65,14 +91,18 @@ class MapBox(object):
 					accesstoken=mapbox_key,
 					bearing=0,
 					center=dict(
-						lat=38,
-						lon=-94
+						lon=(dff.lon.max()+dff.lon.min())/2,
+              			lat=(dff.lat.max()+dff.lat.min())/2
 						),
 					pitch=0,
-					zoom=3,
+					zoom=self.test_zoom(lat_range, lon_range),
+					#zoom=self.ret_zoom_level(lat_range, lon_range),
 					style='light'
 					),
 				)
-
+		print(layout.mapbox.zoom)
+		type(self).layout_zoom = layout.mapbox.zoom
 		fig = dict(data=data, layout=layout)
 		return fig
+
+
