@@ -18,7 +18,6 @@ class MapBox(object):
 		self.df = df 
 		self.df_geo = self.create_piv_for_geo()
 		self.scale = 4000
-		self.dropdown_element = self.create_drop_down_element()
 
 	def create_piv_for_geo(self):
 		df_geo = self.df.groupby(['address', 'store_no', 'lat', 'lon', 'state', 'short_address'])
@@ -31,14 +30,9 @@ class MapBox(object):
 		df_geo['size'] = (df_geo['Amount']['sum'].apply(lambda x: x/(1.021**x)))
 		return df_geo
 
-	def create_drop_down_element(self):
-		dropdown = dcc.Dropdown(
-			id = 'map_state_list',
-			options = [{'label':k, 'value': k} for k in list(self.df_geo.state.unique())],
-			value = list(self.df_geo.state.unique()),
-			multi = True
-			)
-		return dropdown
+	def return_drop_down_list(self):
+		return [{'label':k, 'value': k} for k in list(self.df_geo.state.unique())]
+
 
 	def test_zoom(self, lat, lon):
 
