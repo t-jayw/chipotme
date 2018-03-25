@@ -61,9 +61,7 @@ dcc.Upload(
     },
     # Allow multiple files to be uploaded
     multiple=False
-), html.P(id="upload", children="please upload")]),
-
-html.Button(id='propagate-button', n_clicks=0, children='Propagate Table Data'),
+), html.P(id="data_source", children="Using stock data.")]),
 
 ## SPEND LINE
 html.Div([
@@ -131,6 +129,16 @@ def do_something(contents): ### TO DO <-- make this a real class with nice funct
 	return ret
 
 @app.callback(
+	Output('data_source', 'children'),
+	[Input('json_store', 'children')]
+	)
+def switch_data_source(children):
+	if children != '':
+		return 'Showing user uploaded data'
+	else:
+		return 'Showing stock data'
+
+@app.callback(
 		Output('map_state_list', 'value'),
 		[Input('json_store', 'children')]
 	)
@@ -185,6 +193,7 @@ def line_graph_cb(value, svalue, children):
     Output('heatmap', 'figure'),
     [Input('heat_radio', 'value'), Input('json_store', 'children')])
 def ret_heatmap_figure(value, children):
+	print('I AM HEAT CALL')
 	hdf = df if children == '' else pd.read_json(children)
 	heat = hm.HeatMap(hdf)
 	return heat.ret_heatmap_figure(value)

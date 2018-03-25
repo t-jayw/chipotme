@@ -42,7 +42,7 @@ class HeatMap():
 		hm = self.df_hm.pivot_table(index='day_of_week', columns='season',
 									values='Amount', aggfunc=str(value))
 		hm.fillna(0, inplace=True)
-		hm = hm[['Spring', 'Summer', 'Autumn', 'Winter']]
+		hm = hm.loc[:,hm.columns.isin(['Spring', 'Summer', 'Autumn', 'Winter'])]
 		hm = hm.reindex(list(self.days.values())[::-1])
 
 		trace = Heatmap(z=[hm.values[x] for x in range(0,len(hm.values))],
