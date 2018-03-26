@@ -78,7 +78,7 @@ class MapBox(object):
 				])
 
 		layout = Layout(
-				title="Your favorite spots",
+				title="Visited Chipotle Stores",
 				autosize=True,
 				hovermode='closest',
 				showlegend=False,

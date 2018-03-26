@@ -115,14 +115,14 @@ class ChipotleSpendLine(object):
     return [spend, trend]
 
   def make_lay(self, value='a'):
-    title_options = {'a':'Purchases over Time','b':'Cumulative Purchases'}
+    title_options = {'a':'Chipotle Transactions','b':'Cumulative Chipotle Spend'}
     col = self.target[value]['trend']
     scatter_lay = Layout(
       title = title_options[value],
       yaxis=dict(
         zeroline=True,
         range=[0,max(self.plot_df[col])+8],
-        title='Spend in Local Currency'
+        title='$$$ or local currency for i18n ;)'
         ),
         xaxis=dict(title='Date'),
     height=400,
