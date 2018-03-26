@@ -44,6 +44,7 @@ class ChipotleSpendLine(object):
     self.target = {'a':{'col':'Amount','trend':'trend'},
               'b':{'col':'cum_sum', 'trend':'cs_trend'}}
     self.df.Date = pd.to_datetime(self.df['Date'])
+    self.df = df.sort_values(by='Date')
     self.base = df.Date.max()
     self.df = self.prep_data()
     self.set_trend_col()
@@ -51,6 +52,7 @@ class ChipotleSpendLine(object):
     self.forecast()
     self.trim_df(slide_value)
     self.value = value
+    print(self.df[:10])
 
   def prep_data(self):
     ldf = self.df
