@@ -25,7 +25,7 @@ class DataHandler(object):
     self.pdf = self.gen_processed_df()
     self.store_records = self.enhance_with_StoreInfo()
     self.final_df = self.merge_txn_and_store_info()
-    if rec_data == 1:
+    if rec_data == [1]:
       self.log_transactions(self.final_df)
 
 

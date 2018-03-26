@@ -284,7 +284,7 @@ def do_something(contents, rec_data): ### TO DO <-- make this a real class with 
 		decoded = base64.b64decode(content_string)
 		df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-		new_DataObj = dm.DataHandler(df, rec_data[0])
+		new_DataObj = dm.DataHandler(df, rec_data)
 		print('have new data')
 
 		ret = new_DataObj.final_df.to_json()
