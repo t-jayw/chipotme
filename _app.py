@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.plotly as py
 import statsmodels.api as sm
+import stylefile as s
 
 
 from plotly.graph_objs import *
@@ -44,52 +45,81 @@ html.Div([
 ]),
 
 html.Div([
-dcc.Upload(
-    id='upload-data',
-    children=html.Div([
-        'Drag and Drop or ',
-        html.A('Select Files')
-    ]),
-    style={
-        'width': '100%',
-        'height': '50px',
-        'lineHeight': '50px',
-        'borderWidth': '1px',
-        'borderStyle': 'dashed',
-        'borderRadius': '5px',
-        'textAlign': 'center',
-    },
-    # Allow multiple files to be uploaded
-    multiple=False
-), html.P(id="data_source", children="Using stock data.")]),
+	dcc.Upload(
+	    id='upload-data',
+	    children=html.Div([
+	        '',
+	        html.A('Click to Upload File')
+	    ]),
+	    style={
+	        'width': '20%',
+	        'height': '40px',
+	        'lineHeight': '40px',
+	        'borderWidth': '1px',
+	        'borderStyle': 'dashed',
+	        'borderRadius': '5px',
+	        'textAlign': 'center',
+	    },
+	    # Allow multiple files to be uploaded
+	    multiple=False
+	), 
+	html.P(id="data_source", children="Using stock data.")]
+	),
 
 ## SPEND LINE
 html.Div([
-	html.Div(
-  		[lg.spendline_radio,
-  		dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
-  		lg.spendline_slider], 
-  		style={'padding-top':'10px', 'padding-bottom':'20px',
-          		'padding-left':'10px', 'font-size':'1em',
-          		'width':'100%'}
-        ),
-  	html.Div(
-  		[dcc.Graph(id='spendline')])
-		], style={'width':'50%'}
+
+	html.Div([
+		html.Div([
+			html.H4('Spending over time'),
+			html.P('''Select the `Cumulative Sum` option for a running total'''),
+			html.H4('''Forecast'''),
+			html.P('''A univariate logistic regression fit to the transaction data predicts future values'''),
+		], 		
+		style={'width':'100%', 'display':'inline-block','borderWidth':'1px','borderStyle': 'dashed'}
 		),
+		html.Div(
+	  		[lg.spendline_radio,
+	  		dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
+	  		lg.spendline_slider], 
+	  		style={'padding-top':'10px', 'padding-bottom':'20px',
+	          		'padding-left':'10px', 'font-size':'1em',
+	          		'width':'70%','margin':'0 auto'}
+	        ),
+	  	html.Div(
+	  		[dcc.Graph(id='spendline')])
+		], 
+		style={'width':'90%','borderWidth':'1px',
+		'borderStyle': 'dashed','margin':'0 auto'}
+		),
+		],
+
+	),
 
 ## MAPBOX
 html.Div([
-		dcc.Dropdown(
-			id = 'map_state_list',
-			multi = True
-			),
-		dcc.Graph(id='mapbox',style={'height': '600px', 'width':'100%'}),
-	], style={'width':'90%','margin':'0 auto', 'height':'auto'}
+	html.H4('Commonly visited locations'),
+	html.P('''Each dot is a Chipotle location where there is a transaction.'''),
+	html.P("""The dots are scaled by total spend at a given location."""),
+	html.P("""If there are multiple states, you can select and deselect them with the dropdown."""),
+	html.P("""Making the graph automatically resize took me forever, so please enjoy it"""),
+
+	dcc.Dropdown(
+		id = 'map_state_list',
+		multi = True
+		),
+	dcc.Graph(id='mapbox',style={'height': '600px', 'width':'100%'}),
+	], 
+	style={'width':'90%','margin':'0 auto', 'height':'auto',
+				'borderWidth':'1px','borderStyle': 'dashed'}
 	),
 
 ## HEAT MAP
+
+
 html.Div([
+	html.H4('Heatmap for seasonal visitation trends'),
+	html.P('Select aggregations by Total spend, Average spend, or count of visits'),
 	dcc.RadioItems(
 		id = 'heat_radio',
 		options = [{'label':"Total Spend    ",'value':'sum'}, 
@@ -97,15 +127,42 @@ html.Div([
 		        {'label':'# of Visits','value':'count'}],
 		value = 'sum',
 		labelStyle={'display':'inline-block'}),
-  	dcc.Graph(id='heatmap',style={'display': 'inline-block', 
-  							'width':'100%','height':'100%'}),],
-  	style={'display':'inline-block', 'width':'50%'}
+  	dcc.Graph(id='heatmap',style={ 
+  							'width':'50%','height':'100%', 'margin':'0 auto',}),
+  	],
+  	style={'width':'90%', 'margin':'0 auto',
+  			'borderWidth':'1px','borderStyle': 'dashed'}
     ),
-html.Div(id="json_store", children="")
 
+
+html.Div(id="json_store", children="", style={'display': 'none'})
 ], 
-style={'width':'70%','border':'1px solid black','margin':'0 auto'},className='main'
+style={'width':'80%','border':'1px solid black','margin':'0 auto',
+		},
+className='main'
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### CALLBACKS to graph files and fig returners
 #GEO

@@ -123,7 +123,7 @@ class ChipotleSpendLine(object):
         title='Spend in Local Currency'
         ),
         xaxis=dict(title='Date'),
-    height=300,
+    height=400,
     paper_bgcolor='#FBF9F6'
     )
     print('range: '+str(scatter_lay.yaxis.range))
