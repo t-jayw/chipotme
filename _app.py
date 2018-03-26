@@ -152,7 +152,9 @@ html.Div([
 		**p_style,**{'borderBottomStyle':'solid'},
 					'borderBottomWidth': '8px',
 					'padding-bottom':'10px',
-					'borderBottomColor':ch_red})
+					'borderBottomColor':ch_red}),
+	html.A(href='https://github.com/t-jayw/chipotme', children='source code', style={'font-size':'10px'}),
+
 ]),
 
 ## SPEND LINE
