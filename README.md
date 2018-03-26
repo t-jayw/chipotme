@@ -2,4 +2,4 @@
 
 ###Analytics for your chipotle consumption
 
-![output](https://i.imgur.com/bevJdQ3.png)
+![output](https://i.imgur.com/lLkiTT3.png)
