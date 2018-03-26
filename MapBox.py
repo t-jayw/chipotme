@@ -27,7 +27,7 @@ class MapBox(object):
 						'<br>Avg $: '+amounts['mean'].map(str)+\
 						'<br>Total $: '+amounts['sum'].map(str)+\
 						'<br>'+df_geo['short_address']
-		df_geo['size'] = (df_geo['Amount']['sum'].apply(lambda x: x/(1.021**x)))
+		df_geo['size'] = ((df_geo['Amount']['sum'] / 3) + 5/df_geo['Amount']['count']) #.apply(lambda x: x/(1.021**x)))
 		return df_geo
 
 	def return_drop_down_list(self):
@@ -70,7 +70,7 @@ class MapBox(object):
 					mode='markers',
 					marker=Marker(
 						size=dff['size'],
-						opacity = 0.4,
+						opacity = .5,
 						color = 'rgb(140,21,5)'
 						),
 					text=dff['text']

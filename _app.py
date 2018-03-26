@@ -22,6 +22,7 @@ import new_DataModel as dm
 import GeoScatter as gs 
 import HeatMap as hm
 import MapBox as mb 
+import Summary as s
 # 
 ch_red = 'rgb(140,21,5)'
 ch_brown = 'rgb(69, 20, 0)'
@@ -113,31 +114,53 @@ html.Div([
 		html.P('''Of what you send, I will filter to just Chipotle anyways, and MAY retain data such as 
 				 which store locations are popular among users of the app, and transaction data for population statistics''', style=p_style),
 		html.H4('''I don't want any thing except Chipotle transactions, so don't send it!!!''', style=p_style),
+		html.Br(),
+		html.H4('''Please check the box below BEFORE uploading your data if it's okay for me
+					to log your anonymized chipotle transactions!''', style=p_style),
+		html.P('''If it's unselected the app will still run, no transaction data will be stored''', style=p_style),
+
+		html.Br(),
 		html.Div([
 			dcc.Upload(
 			    id='upload-data',
 			    children=html.Div([
 			        '',
-			        html.A('Click to Upload File')
-			    ]),
+			        html.A('Upload Data', style={'color':ch_red, 'font-weight':'bolder'}), 
+			    ],),
 			    style={
 			        'width': '20%',
 			        'height': '40px',
 			        'lineHeight': '40px',
-			        'borderWidth': '2px',
+			        'borderWidth': '3px',
 			        'borderStyle': 'solid',
 			        'borderRadius': '5px',
 			        'textAlign': 'center',
+			        'background-color':'#9E9D72',
+			        'display':'inline-block'
 			    },
 			    # Allow multiple files to be uploaded
 			    multiple=False
 				), 
+			dcc.Checklist(id='rec_data', 
+				options=[
+				{'label':'You can save my anonymous Chipotle transaction info','value':1},
+				], values=[], style={'display':'inline-block'})
 			]),
-		], id='upload-info',style={}),
-	html.H4(id="data_source", children="Using stock data.", style=p_style)
+		], id='upload-info',
+			style={}),
+	html.H4(id="data_source", children="Using stock data.", style={
+		**p_style,**{'borderBottomStyle':'solid'},
+					'borderBottomWidth': '8px',
+					'padding-bottom':'10px',
+					'borderBottomColor':ch_red})
 ]),
 
-
+## SPEND LINE
+html.Div([
+	html.Div(
+		[dcc.Markdown(id='summary-markdown')
+		], style={'text-align':'left', 'padding-left':'5%', }),
+	], style={'width':'90%',}),
 
 ## SPEND LINE
 html.Div([
@@ -233,14 +256,27 @@ def show_upload_info(n_clicks):
 	else:
 		return {}
 
+### SUMMARY
+########INPUT
+@app.callback(
+	Output('summary-markdown', 'children'),
+	[Input('json_store', 'children')]
+	)
+def create_summary(children):
+	sdf = df if children == '' else pd.read_json(children)
+	summ = s.Summary(sdf)
+	md = summ.markdown()
+	print(md)
+	return(md)
 
 ### CALLBACKS to graph files and fig returners
 ########## INPUT
 @app.callback(
 	Output('json_store', 'children'),
-	[Input('upload-data', 'contents')]
+	[Input('upload-data', 'contents'),
+	Input('rec_data', 'values')]
 	)
-def do_something(contents): ### TO DO <-- make this a real class with nice functions
+def do_something(contents, rec_data): ### TO DO <-- make this a real class with nice functions
 	if contents is None:
 		ret = ""
 	else:
@@ -248,7 +284,7 @@ def do_something(contents): ### TO DO <-- make this a real class with nice funct
 		decoded = base64.b64decode(content_string)
 		df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-		new_DataObj = dm.DataHandler(df)
+		new_DataObj = dm.DataHandler(df, rec_data[0])
 		print('have new data')
 
 		ret = new_DataObj.final_df.to_json()
