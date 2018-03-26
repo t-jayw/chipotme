@@ -61,7 +61,7 @@ class ChipotleSpendLine(object):
     ldf['Date'] = ldf.index
     ldf.index = pd.to_datetime(ldf.index)
     ldf['numdate'] = ldf.index.to_julian_date()
-    ldf = reverse_order_cum_sum(ldf, 'Amount')
+    ldf['cum_sum'] = ldf.Amount.cumsum()
     return ldf
 
   def set_trend_col(self):

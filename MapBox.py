@@ -70,7 +70,8 @@ class MapBox(object):
 					mode='markers',
 					marker=Marker(
 						size=dff['size'],
-						opacity = 0.4
+						opacity = 0.4,
+						color = 'rgb(140,21,5)'
 						),
 					text=dff['text']
 					)
@@ -81,6 +82,8 @@ class MapBox(object):
 				autosize=True,
 				hovermode='closest',
 				showlegend=False,
+				margin=dict(l=80,r=80,t=80,b=80),
+				paper_bgcolor='#FBF9F6',
 				mapbox=dict(
 					accesstoken=mapbox_key,
 					bearing=0,

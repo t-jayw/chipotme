@@ -112,7 +112,8 @@ app.layout  = html.Div([
       [dcc.Markdown('''Forecast Future Values[*](https://xkcd.com/605/)'''),
       lg.spendline_slider], 
       style={'padding-top':'10px', 'padding-bottom':'20px',
-              'padding-left':'10px', 'font-size':'1em'}),
+              'padding-left':'5px', 'font-size':'.6em'
+              'text-algin''left'}),
 	  html.Div([dcc.Graph(id='spendline')])
 	], style={'width':'50%'}),
 
