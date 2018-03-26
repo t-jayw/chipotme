@@ -62,6 +62,9 @@ global_style = {
     'background-color':background,
     'margin':'0 auto'
     }
+
+
+
 # Load data
 
 data_obj = dm.DataHandler()
@@ -72,38 +75,69 @@ geo = gs.GeoScatter(df)
 heat = hm.HeatMap(df)
 
 app = dash.Dash()
+mint_search = 'img/mint-search.png' # replace with your own image
+mint_search = base64.b64encode(open(mint_search, 'rb').read())
 
-map_drop_down_options = 'CO'
+mint_export = 'img/mint-export.png' # replace with your own image
+mint_export = base64.b64encode(open(mint_export, 'rb').read())
+
+transaction_csv = 'img/transaction-csv.png' # replace with your own image
+transaction_csv = base64.b64encode(open(transaction_csv, 'rb').read())
+
+
 
 app.layout  = html.Div([
 
 html.Div([
 	html.H1('chipot.me', style=h1_style), 
 	html.P("""Analysis of Chipotle consumption from mint.com transaction history""",
-				style = p_style)
+				style = p_style),
+	html.P("""By default this app will use a default dataset to render the graphs. 
+				If you'd like to update the app with your own Chipotle transactions click below.""",
+				style = p_style),
+	html.Button("""Upload your own data""",id='show_upload', style=p_style),
+	html.Div([
+		html.H4('''How to upload your own data''', style=h4_style),
+		html.P('''This app specifically uses Mint.com transaction data.''', style=p_style),
+		html.H4('''Follow these instructions to export your Chipotle transactions to a CSV file''', style = p_style),
+		html.P('''1. Sign into Mint and go to the 'Transactions' tab''',style=p_style),
+		html.P('''2. In the search bar enter 'Chipotle' and hit enter''', style=p_style),
+		html.P('''3. Scroll through and confirm that these are all Chipotle transactions''', style=p_style),
+		html.P('''4. At the bottom of the screen find 'Export all ... transacations' and click that''', style=p_style),
+		html.P('''5. This will start a download of a file called 'transactions.csv', this exact
+					 file is the one that you will upload via the selector below.''', style=p_style),
+		html.A(href='https://imgur.com/a/zLTBE', children='Click here to see images of the steps',
+				target='_blank'),
+		html.P('''Please note that if you follow the steps above you will only be sending Chipotle transactions,
+					and no personal information.''', style=p_style),
+		html.P('''Of what you send, I will filter to just Chipotle anyways, and MAY retain data such as 
+				 which store locations are popular among users of the app, and transaction data for population statistics''', style=p_style),
+		html.H4('''I don't want any thing except Chipotle transactions, so don't send it!!!''', style=p_style),
+		html.Div([
+			dcc.Upload(
+			    id='upload-data',
+			    children=html.Div([
+			        '',
+			        html.A('Click to Upload File')
+			    ]),
+			    style={
+			        'width': '20%',
+			        'height': '40px',
+			        'lineHeight': '40px',
+			        'borderWidth': '2px',
+			        'borderStyle': 'solid',
+			        'borderRadius': '5px',
+			        'textAlign': 'center',
+			    },
+			    # Allow multiple files to be uploaded
+			    multiple=False
+				), 
+			]),
+		], id='upload-info',style={}),
+	html.H4(id="data_source", children="Using stock data.", style=p_style)
 ]),
 
-html.Div([
-	dcc.Upload(
-	    id='upload-data',
-	    children=html.Div([
-	        '',
-	        html.A('Click to Upload File')
-	    ]),
-	    style={
-	        'width': '20%',
-	        'height': '40px',
-	        'lineHeight': '40px',
-	        'borderWidth': '1px',
-	        'borderStyle': 'dashed',
-	        'borderRadius': '5px',
-	        'textAlign': 'center',
-	    },
-	    # Allow multiple files to be uploaded
-	    multiple=False
-	), 
-	html.P(id="data_source", children="Using stock data.", style={'text-align':'left'})]
-	),
+
 
 ## SPEND LINE
 html.Div([
@@ -187,6 +221,19 @@ className='main'
 
 
 ######################################################################
+
+### SHOW UPLOAD DIV
+@app.callback(
+	Output('upload-info', 'style'),
+	[Input('show_upload', 'n_clicks')]
+	)
+def show_upload_info(n_clicks):
+	if not n_clicks or n_clicks%2 == 0:
+		return {'visibility':'hidden', 'height':'0px'}
+	else:
+		return {}
+
+
 ### CALLBACKS to graph files and fig returners
 ########## INPUT
 @app.callback(
@@ -276,8 +323,5 @@ def ret_heatmap_figure(value, children):
 
 
 if __name__=='__main__':
-
-  map_drop_down_options = []
-
   app.run_server(debug=True)
 
