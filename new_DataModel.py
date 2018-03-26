@@ -1,4 +1,4 @@
-import re, sys, os
+import re, sys, os, random
 import pandas as pd
 import requests as r
 
@@ -10,7 +10,7 @@ class DataHandler(object):
   req_columns = ['Date', 'Description', 'Original Description',
                 'Amount', 'Transaction Type', 'Category']
 
-  def __init__(self, df=pd.DataFrame()):
+  def __init__(self, df=pd.DataFrame(), rec_data=0):
     if not df.empty:
       self.raw_df = df
     else:
@@ -25,6 +25,14 @@ class DataHandler(object):
     self.pdf = self.gen_processed_df()
     self.store_records = self.enhance_with_StoreInfo()
     self.final_df = self.merge_txn_and_store_info()
+    if rec_data == [1]:
+      self.log_transactions(self.final_df)
+
+
+  def log_transactions(self, df):
+    file_unique = random.randint(0,10**8)
+    file_path = 'data/anon/%s_chipotle_final.csv'%(str(file_unique))
+    df.to_csv(file_path)
 
 
   def verify_columns(self):
