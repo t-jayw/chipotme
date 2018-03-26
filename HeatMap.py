@@ -47,7 +47,7 @@ class HeatMap():
 
 		trace = Heatmap(z=[hm.values[x] for x in range(0,len(hm.values))],
 						x=hm.columns, y=hm.index, colorscale='YlOrBr')
-		layout = dict(title='Season/Day Frequency', height=600)
+		layout = dict(title='Season/Day Frequency', height=600, paper_bgcolor='#FBF9F6')
 		figure = dict(data=[trace], layout=layout)			
 
 		return figure
