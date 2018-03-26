@@ -1,4 +1,5 @@
 import re, sys, dash, base64, io
+
 import pandas as pd
 import requests as r
 import zipcodes as zc
@@ -7,8 +8,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.plotly as py
 import statsmodels.api as sm
-import stylefile as s
-
 
 from plotly.graph_objs import *
 from bs4 import BeautifulSoup as bs
@@ -16,10 +15,8 @@ from dash.dependencies import Input, Output
 from textwrap import dedent as d
 
 import LineGraph as lg
-
 import StoreLocator as sl
 import new_DataModel as dm
-import GeoScatter as gs 
 import HeatMap as hm
 import MapBox as mb 
 import Summary as s
@@ -71,19 +68,10 @@ global_style = {
 data_obj = dm.DataHandler()
 
 df = data_obj.final_df
-
-geo = gs.GeoScatter(df)
 heat = hm.HeatMap(df)
 
+
 app = dash.Dash()
-mint_search = 'img/mint-search.png' # replace with your own image
-mint_search = base64.b64encode(open(mint_search, 'rb').read())
-
-mint_export = 'img/mint-export.png' # replace with your own image
-mint_export = base64.b64encode(open(mint_export, 'rb').read())
-
-transaction_csv = 'img/transaction-csv.png' # replace with your own image
-transaction_csv = base64.b64encode(open(transaction_csv, 'rb').read())
 
 
 

@@ -34,7 +34,6 @@ class StoreInfo(object):
     if lines:
       for x in lines:
         zipc = self.pull_span_zip(x, self.store_no)
-        print(zipc)
         if zipc:
           output = zipc, x
           return output
@@ -53,7 +52,6 @@ class StoreInfo(object):
     store_no = self.store_no
     self.add_new_store_record() ## This should go get the relevant info
       
-
   def get_new_store_record(self):
     store_no = self.store_no
     ### I don't have a record for this store
@@ -71,7 +69,6 @@ class StoreInfo(object):
     else:
       print("couldn't find store")
       return None
-
 
   def get_store_info(self):
     col_names = ['store_no', 'zip_code', 'address', 'lat', 'lon', 'city', 'state']

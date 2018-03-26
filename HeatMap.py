@@ -4,7 +4,6 @@ import pandas as pd
 import plotly.plotly as py
 import dash_html_components as html
 import dash_core_components as dcc
-import statsmodels.api as sm
 
 from plotly.graph_objs import *
 
