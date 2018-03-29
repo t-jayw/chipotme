@@ -9,7 +9,7 @@ import statsmodels.api as sm
 
 from plotly.graph_objs import *
 
-from secrets import keys
+from chipotme.secrets import keys
 
 mapbox_key = keys['mapbox']
 
