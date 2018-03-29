@@ -1,11 +1,4 @@
-import re, sys, dash, datetime
-
-import pandas as pd  
-import plotly.plotly as py
-import dash_html_components as html
-import dash_core_components as dcc
-
-from plotly.graph_objs import *
+import pandas as pd
 
 class Summary():
 	def __init__(self, df):
@@ -56,15 +49,15 @@ class Summary():
 
 	def markdown(self):
 		md = """
-Since **{min_date}** you have visited Chipotle **{count_visits}** times.
+Since **{min_date}** Chipotle has been visited **{count_visits}** times.
 
-Across **{total_stores}** different locations you have ordered **${total_spend}** worth of Chipotle
+Across **{total_stores}** different locations **${total_spend}** worth of Chipotle has been ordered.
 
-Your favorite store is Store **{fav_store_no}** at **{fav_store_city}**
+The favorite store is Store **{fav_store_no}** at **{fav_store_city}**
 
-On average you spend **${spend_avg}** on a visit to Chipotle. 
+On average **${spend_avg}** is spent on a visit to Chipotle.
 
-Scroll down to learn more about your Chipotle history.
+Scroll down to learn more about Chipotle behavior of the Chipotme users.
 """.format(**self.format_args())
 		return md
 
