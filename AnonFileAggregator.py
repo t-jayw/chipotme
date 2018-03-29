@@ -16,4 +16,10 @@ concatenated_df   = pd.concat(df_from_each_file, ignore_index=True)
 
 concatenated_df.drop_duplicates(inplace=True)
 
+prev_len = len(pd.read_csv('data/default.csv'))
+
 concatenated_df.to_csv('data/default.csv')
+
+new_len = len(concatenated_df)
+
+print('Prev length: %i \n New length: %i'%(prev_len, new_len))
