@@ -1,8 +1,6 @@
-import re, sys, dash, datetime
+import datetime
 
-import pandas as pd  
-import plotly.plotly as py
-import dash_html_components as html
+import pandas as pd
 import dash_core_components as dcc
 import statsmodels.api as sm
 
@@ -79,7 +77,7 @@ class ChipotleSpendLine(object):
     ldf['cs_trend'] = res.fittedvalues
     self.df = ldf
     self.cs_trend = res
-    
+
   def forecast(self, max_years = 5):
     numdays = 365 * max_years
     base = self.base
@@ -108,7 +106,7 @@ class ChipotleSpendLine(object):
     trend = Scatter(
       x = self.plot_df['Date'],
       y = self.plot_df[self.target[value]['trend']],
-      name = 'Trend', 
+      name = 'Trend',
       line = dict(color = 'rgb(69, 20, 0)')
     )
     self.data = [spend, trend]
@@ -131,7 +129,7 @@ class ChipotleSpendLine(object):
     print('range: '+str(scatter_lay.yaxis.range))
     print(max(self.plot_df[col]))
     return scatter_lay
-  
+
   def make_graph(self):
     scatter_graph = dcc.Graph(
       id='spend-line',

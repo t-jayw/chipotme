@@ -1,20 +1,14 @@
-import re, sys, dash, base64, io
+import dash, base64, io
 
 import pandas as pd
-import requests as r
-import zipcodes as zc
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.plotly as py
-import statsmodels.api as sm
 
 from plotly.graph_objs import *
-from bs4 import BeautifulSoup as bs
 from dash.dependencies import Input, Output
-from textwrap import dedent as d
 
 from chipotme import LineGraph as lg
-from chipotme import StoreLocator as sl
 from chipotme import new_DataModel as dm
 from chipotme import HeatMap as hm
 from chipotme import MapBox as mb
@@ -133,7 +127,7 @@ html.Div([
 			]),
 		], id='upload-info',
 			style={}),
-	html.H4(id="data_source", children="Using stock data.", style={
+	html.H4(id="data_source", children="Showing Data from All Users", style={
 		**p_style,**{'borderBottomStyle':'solid'},
 					'borderBottomWidth': '8px',
 					'padding-bottom':'10px',
@@ -272,7 +266,7 @@ def switch_data_source(children):
 	if children != '':
 		return 'Showing user uploaded data'
 	else:
-		return 'Showing stock data'
+		return 'Showing all saved transaction data'
 
 ####### SUMMARY
 @app.callback(

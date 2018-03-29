@@ -1,8 +1,5 @@
-import re, sys, os, random
+import re, random
 import pandas as pd
-import requests as r
-
-from pathlib import Path
 
 from chipotme import StoreLocator as sl
 
@@ -27,7 +24,7 @@ class DataHandler(object):
     self.final_df = self.merge_txn_and_store_info()
     if rec_data == [1]:
       self.log_transactions(self.final_df)
-
+    print(len(self.pdf))
 
   def log_transactions(self, df):
     file_unique = random.randint(0,10**8)
@@ -112,5 +109,5 @@ class DataHandler(object):
 
 
 if __name__ == '__main__':
-  foo = DataProcessor()
+  foo = DataHandler()
 
