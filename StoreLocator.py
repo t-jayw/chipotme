@@ -21,7 +21,7 @@ class StoreInfo(object):
     pat = "(^|^0*)%s"%(store_no)
     if re.match(pat, span_text):
       zipcode = re.findall(' (\d{5})', span_text)
-      return zipcode[0]
+      return zipcode[len(zipcode-1))]
     else:
       return None
 
