@@ -100,6 +100,11 @@ html.Div([
 
 		html.Br(),
 		html.Div([
+			dcc.Checklist(id='rec_data',
+				options=[
+				{'label':'You can save my anonymous Chipotle transaction info','value':1},
+				], values=[], style={'display':'inline-block'}),
+			html.Br(),
 			dcc.Upload(
 			    id='upload-data',
 			    children=html.Div([
@@ -120,10 +125,7 @@ html.Div([
 			    # Allow multiple files to be uploaded
 			    multiple=False
 				),
-			dcc.Checklist(id='rec_data',
-				options=[
-				{'label':'You can save my anonymous Chipotle transaction info','value':1},
-				], values=[], style={'display':'inline-block'})
+
 			]),
 		], id='upload-info',
 			style={}),
