@@ -327,6 +327,6 @@ def ret_heatmap_figure(value, children):
 	return heat.ret_heatmap_figure(value)
 
 
-#if __name__=='__main__':
-#  app.run_server(debug=True)
+if __name__=='__main__':
+  app.run_server(debug=True)
 
